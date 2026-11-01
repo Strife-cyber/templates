@@ -1,0 +1,21 @@
+# https://docs.devin.ai/onboard-devin/environment-yaml
+# Commands run from the repo root.
+initialize: |
+  npm install
+  npx playwright install chromium
+maintenance: |
+  npm install
+knowledge:
+  - name: dev
+    contents: |
+      npm run dev  # Vite dev server on :5173
+  - name: test
+    contents: |
+      npm test            # vitest unit tests
+      npx playwright test # e2e DoD scenarios; writes sample PDFs/XLSX to samples/output/
+  - name: lint
+    contents: |
+      npx oxlint  # lint config in .oxlintrc.json; npm run format for prettier
+  - name: build
+    contents: |
+      npm run build  # tsc type-check + vite build
