@@ -28,13 +28,20 @@ const BASIC: { type: ElementType; label: string; icon: ReactNode }[] = [
   { type: 'pageNumber', label: 'Page number', icon: <FileDigit size={15} /> },
 ]
 
-function DraggableItem(props: { id: string; label: string; icon: ReactNode; hint?: string }) {
+function DraggableItem(props: {
+  id: string
+  label: string
+  icon: ReactNode
+  hint?: string
+  onInsert?: (id: string) => void
+}) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: props.id })
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onClick={() => props.onInsert?.(props.id)}
       className={`flex cursor-grab items-center gap-2 rounded-md px-2 py-1.5 text-[12.5px] text-ink-2 hover:bg-black/5 active:cursor-grabbing ${
         isDragging ? 'opacity-40' : ''
       }`}
@@ -46,7 +53,7 @@ function DraggableItem(props: { id: string; label: string; icon: ReactNode; hint
   )
 }
 
-export function Palette() {
+export function Palette({ onInsert }: { onInsert?: (id: string) => void }) {
   const { scenarioId, context } = useVisualEditorStore()
   const [contextPaths, setContextPaths] = useState<string[]>([])
 
@@ -84,7 +91,7 @@ export function Palette() {
       <div className="flex-1 overflow-y-auto p-2">
         <div className="mb-1 px-1 text-[10.5px] font-semibold text-ink-3/80">Basic</div>
         {BASIC.map((b) => (
-          <DraggableItem key={b.type} id={`palette:${b.type}`} label={b.label} icon={b.icon} />
+          <DraggableItem key={b.type} id={`palette:${b.type}`} label={b.label} icon={b.icon} onInsert={onInsert} />
         ))}
 
         <div className="mt-3 mb-1 px-1 text-[10.5px] font-semibold text-ink-3/80">
@@ -105,6 +112,7 @@ export function Palette() {
                   id={`bind:${p}`}
                   label={p.replace(/\[\]/g, '[ ]')}
                   icon={<span className="font-mono text-[10px] text-accent">{}</span>}
+                  onInsert={onInsert}
                 />
               ))}
             </div>

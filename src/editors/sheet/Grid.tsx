@@ -245,7 +245,29 @@ export function SheetGrid({ onRequestRowSource }: { onRequestRowSource: () => vo
             value={editText}
             onChange={(e) => store.setState({ editText: e.target.value })}
             onBlur={() => store.getState().commitEdit()}
-            onKeyDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              // Handled here (not the grid listener): stopPropagation keeps grid
+              // shortcuts out while typing; refocus the grid so they resume.
+              e.stopPropagation()
+              const s = store.getState()
+              const { row, col } = { row: editing!.row, col: editing!.col }
+              const back = () => scrollRef.current?.focus()
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                s.commitEdit()
+                s.setActiveCell({ row: row + (e.shiftKey ? -1 : 1), col })
+                back()
+              } else if (e.key === 'Escape') {
+                e.preventDefault()
+                s.cancelEdit()
+                back()
+              } else if (e.key === 'Tab') {
+                e.preventDefault()
+                s.commitEdit()
+                s.setActiveCell({ row, col: col + (e.shiftKey ? -1 : 1) })
+                back()
+              }
+            }}
           />
         ) : (
           cellDisplay(cell)
