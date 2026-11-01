@@ -72,7 +72,11 @@ export function VisualEditorPage() {
 
     useVisualEditorStore.getState().setPageIndex(pageIdx)
 
-    const raw = String(e.active.id)
+    insertFromId(String(e.active.id), x, y)
+  }
+
+  /** Insert a palette/basic (`palette:type`) or data-field (`bind:path`) element at (x, y) mm. */
+  const insertFromId = (raw: string, x: number, y: number) => {
     if (raw.startsWith('palette:')) {
       const type = raw.slice(8) as ElementType
       const d = defaultFor(type)
@@ -148,6 +152,17 @@ export function VisualEditorPage() {
     [store.template, store.context],
   )
 
+  // Click-to-insert on palette items: place at the centre of the page content box.
+  const insertAtCentre = (raw: string) => {
+    if (!resolved) return
+    const d = raw.startsWith('palette:') ? defaultFor(raw.slice(8) as ElementType) : { w: 60, h: 8 }
+    insertFromId(
+      raw,
+      Math.max(0, (resolved.widthMm - resolved.margins.left - resolved.margins.right - d.w) / 2),
+      Math.max(0, (resolved.heightMm - resolved.margins.top - resolved.margins.bottom - d.h) / 2),
+    )
+  }
+
   if (missing) {
     return <div className="flex h-full items-center justify-center text-sm text-ink-3">Template not found.</div>
   }
@@ -198,7 +213,7 @@ export function VisualEditorPage() {
           </div>
           <DataContextBar scenarioId={scenarioId} recordId={recordId} setContext={setContext} />
           <div className="flex min-h-0 flex-1">
-            <Palette />
+            <Palette onInsert={insertAtCentre} />
             <div className="min-w-0 flex-1">
               <Canvas />
             </div>

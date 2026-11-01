@@ -79,9 +79,14 @@ export function DataContextBar({
       {scenarioId && records.length > 1 && (
         <Select
           value={recordId ?? ''}
-          onChange={async (e) => {
-            const ctx = await getProvider().resolve(scenarioId, e.target.value)
-            setContext(scenarioId, e.target.value, ctx)
+          onChange={(e) => {
+            // Same controlled-select caveat as the scenario picker: capture
+            // before awaiting or React restores the stale DOM value.
+            const rid = e.target.value
+            void (async () => {
+              const ctx = await getProvider().resolve(scenarioId, rid)
+              setContext(scenarioId, rid, ctx)
+            })()
           }}
           className="h-7 min-w-56 text-xs"
         >
